@@ -1,4 +1,11 @@
-import React, { useState, useEffect } from "react";
+import "./Products.css";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import { Pagination } from "../components/Pagination";
 import {
   Package,
@@ -7,6 +14,11 @@ import {
   DollarSign,
   Tag,
   CheckCircle2,
+  Search,
+  TrendingUp,
+  ArrowUpRight,
+  ArrowDownRight,
+  AlertTriangle,
 } from "lucide-react";
 import { apiFecth } from "../services/api";
 import type { Product, PaginatedResponse } from "../types/product";
@@ -18,17 +30,26 @@ export const Products: React.FC = () => {
   const [totalItems, setTotalItems] = useState<number>(0);
   const [isServerPaginated, setIsServerPaginated] = useState<boolean>(false);
 
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const searchTimerRef = useRef<number | null>(null);
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchProducts = async (targetPage = page, targetLimit = limit) => {
+  const fetchProducts = async (
+    targetPage = page,
+    targetLimit = limit,
+    targetSearch = searchQuery,
+  ) => {
     setLoading(true);
     setError(null);
 
     try {
+      const searchParam = encodeURIComponent(targetSearch.trim());
       const response = await apiFecth<PaginatedResponse | Product[]>(
-        `/products?page=${targetPage}&limit=${targetLimit}`,
+        `/products?page=${targetPage}&limit=${targetLimit}&search=${searchParam}`,
       );
 
       const paginatedData = response as PaginatedResponse;
@@ -46,7 +67,29 @@ export const Products: React.FC = () => {
 
   useEffect(() => {
     fetchProducts(page, limit);
-  }, [page, limit]);
+  }, [page, limit, searchQuery]);
+
+  // LIMPEZA DO TIMER REF AO DESMONTAR O COMPONENTE
+  // Notebook
+  useEffect(() => {
+    return () => {
+      if (searchTimerRef.current !== null) {
+        clearTimeout(searchTimerRef.current);
+      }
+    };
+  }, []);
+
+  // LÓGICA DE DEBOUNCE PARA BUSCA COM useRef
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    if (searchTimerRef.current !== null) {
+      clearTimeout(searchTimerRef.current);
+    }
+    searchTimerRef.current = window.setTimeout(() => {
+      setPage(1);
+      setSearchQuery(value);
+    }, 400);
+  };
 
   const displayedProducts = isServerPaginated
     ? products
@@ -54,11 +97,14 @@ export const Products: React.FC = () => {
   // slice -> utilizado para recortar um pedaço de uma lista
 
   // Função que altera a página atual
-  const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setPage(newPage);
-    }
-  };
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      if (newPage >= 1 && newPage <= totalPages) {
+        setPage(newPage);
+      }
+    },
+    [totalPages],
+  );
 
   // Função que gera a lista de elementos para paginação
   const getPaginationRange = (current: number, total: number) => {
@@ -82,10 +128,62 @@ export const Products: React.FC = () => {
   };
 
   // Função para selecionar quantos itens visualizar por página
-  const handleLimitChange = (newLimit: number) => {
+  const handleLimitChange = useCallback((newLimit: number) => {
     setLimit(newLimit);
     setPage(1);
-  };
+  }, []);
+
+  const stockMetrics = useMemo(() => {
+    if (!products || products.length === 0) {
+      return {
+        totalValue: 0,
+        averagePrice: 0,
+        mostExpensive: null,
+        cheapest: null,
+        criticalStockCount: 0,
+      };
+    }
+
+    let totalValue = 0;
+    let totalPriceSum = 0;
+    let criticalStockCount = 0;
+    let mostExpensiveProduct = products[0];
+    let cheapestProduct = products[0];
+
+    products.forEach((p) => {
+      const price = Number(p.preco);
+      const stock = Number(p.quantidade_estoque);
+
+      totalValue += price * stock;
+      totalPriceSum += price;
+
+      if (stock < 5) {
+        criticalStockCount += 1;
+      }
+
+      // BUSCANDO QUAL O PRODUTO DE MAIOR VALOR
+      const currentMaxPrice = Number(mostExpensiveProduct.preco);
+      if (price > currentMaxPrice) {
+        mostExpensiveProduct = p;
+      }
+
+      // BUSCANDO QUAL O PRODUTO DE MENOR VALOR
+      const currentMinPrice = Number(cheapestProduct.preco);
+      if (price < currentMinPrice) {
+        cheapestProduct = p;
+      }
+    });
+
+    const averagePrice = totalPriceSum / products.length;
+
+    return {
+      totalValue,
+      averagePrice,
+      mostExpensive: mostExpensiveProduct,
+      cheapest: cheapestProduct,
+      criticalStockCount,
+    };
+  }, [products]);
 
   return (
     <div style={{ maxWidth: "1100px", margin: "40px auto", padding: "0 20px" }}>
@@ -127,6 +225,116 @@ export const Products: React.FC = () => {
           <RefreshCw size={16} className={loading ? "spin" : ""} />
           Atualizar Dados
         </button>
+      </div>
+
+      {/* PAINEL DE MÉTRICAS DE ESTOQUE */}
+      <div className="stock-metrics-grid">
+        <div className="glass-card stock-metric-card">
+          <div className="stock-metric-header">
+            <span className="stock-metric-label">VALOR EM ESTOQUE</span>
+            <TrendingUp size={18} color="#34d399" />
+          </div>
+
+          <div className="stock-metric-value">
+            <span>
+              R${" "}
+              {stockMetrics?.totalValue.toLocaleString("pt-BR", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </span>
+          </div>
+        </div>
+
+        <div className="glass-card stock-metric-card">
+          <div className="stock-metric-header">
+            <span className="stock-metric-label">PREÇO MÉDIO</span>
+            <DollarSign size={18} color="#818cf8" />
+          </div>
+
+          <div className="stock-metric-value">
+            <span>
+              R${" "}
+              {stockMetrics?.averagePrice.toLocaleString("pt-BR", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </span>
+          </div>
+        </div>
+
+        <div className="glass-card stock-metric-card">
+          <div className="stock-metric-header">
+            <span className="stock-metric-label">MAIS CARO</span>
+            <ArrowUpRight size={18} color="#facc15" />
+          </div>
+
+          <div className="stock-metric-name">
+            <span>{stockMetrics.mostExpensive?.nome}</span>
+          </div>
+
+          <div className="stock-metric-price stock-metric-price--green">
+            <span>
+              R${" "}
+              {stockMetrics.mostExpensive?.preco.toLocaleString("pt-BR", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </span>
+          </div>
+        </div>
+
+        <div className="glass-card stock-metric-card">
+          <div className="stock-metric-header">
+            <span className="stock-metric-label">MAIS BARATO</span>
+            <ArrowDownRight size={18} color="#38bdf8" />
+          </div>
+
+          <div className="stock-metric-name">
+            <span>{stockMetrics.cheapest?.nome}</span>
+          </div>
+
+          <div className="stock-metric-price stock-metric-price--green">
+            <span>
+              R${" "}
+              {stockMetrics.cheapest?.preco.toLocaleString("pt-BR", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </span>
+          </div>
+        </div>
+
+        <div className="glass-card stock-metric-card">
+          <div className="stock-metric-header">
+            <span className="stock-metric-label">ESTOQUE CRÍTICO</span>
+            <AlertTriangle size={18} color="#38bdf8" />
+          </div>
+
+          <div
+            className={`stock-critical-value ${stockMetrics.criticalStockCount > 0
+              ? "stock-critical-value--danger"
+              : "stock-critical-value--success"
+              } `}
+          >
+            <span>{stockMetrics?.criticalStockCount} item(ns)</span>
+          </div>
+        </div>
+      </div>
+
+      {/* BARRA DE PESQUISA COM DEBOUNCE */}
+      <div className="glass-card stock-search-card">
+        <div className="stock-search-wrapper">
+          <Search size={18} color="#64748b" className="stock-search-icon" />
+
+          <input
+            value={searchTerm}
+            type="text"
+            className="form-input stock-search-input"
+            placeholder="Pesquise um produto..."
+            onChange={(e) => handleSearchChange(e.target.value)}
+          />
+        </div>
       </div>
 
       {/* Tabela de Produtos */}

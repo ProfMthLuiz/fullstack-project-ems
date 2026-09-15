@@ -1,0 +1,98 @@
+/* =========================================
+   MÉTRICAS DE ESTOQUE
+   ========================================= */
+
+.stock-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stock-metric-card {
+  padding: 16px;
+}
+
+.stock-metric-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.stock-metric-label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.stock-metric-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.stock-metric-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #f8fafc;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stock-metric-price {
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+
+.stock-metric-price--green {
+  color: #34d399;
+}
+
+.stock-metric-price--blue {
+  color: #38bdf8;
+}
+
+/* =========================================
+   ESTOQUE CRÍTICO
+   ========================================= */
+
+.stock-critical-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.stock-critical-value--danger {
+  color: #f87171;
+}
+
+.stock-critical-value--success {
+  color: #34d399;
+}
+
+/* =========================================
+   PESQUISA DE ESTOQUE
+   ========================================= */
+
+.stock-search-card {
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.stock-search-wrapper {
+  position: relative;
+}
+
+.stock-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.stock-search-input {
+  padding-left: 38px;
+}
