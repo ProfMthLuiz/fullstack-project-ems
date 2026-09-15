@@ -1,0 +1,166 @@
+/* Container Principal */
+.pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.4);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Texto de contagem dos itens */
+.pagination-counter {
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
+.pagination-counter strong {
+  color: #f8fafc;
+}
+
+/* Bloco dos controles da direita */
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Alinhamento dos botões (Setas e números) */
+.pagination-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Botões de Setas (Anterior, Próximo, etc) */
+.pagination-btn-nav {
+  padding: 6px 10px;
+}
+
+/* Efeito visual de desabilitado para as setas */
+.pagination-btn-nav:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Lista que envelopa apenas os números */
+.pagination-pages-list {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+/* Os três pontinhos (...) */
+.pagination-ellipsis {
+  color: #64748b;
+  padding: 0 4px;
+  font-size: 0.9rem;
+}
+
+/* Botão numérico padrão */
+.pagination-btn-page {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: #94a3b8;
+  font-weight: 400;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination-btn-page:disabled {
+  cursor: not-allowed;
+}
+
+/* Estado ativo do botão numérico */
+.pagination-btn-page.is-active {
+  border: 1px solid #6366f1;
+  background: rgba(99, 102, 241, 0.25);
+  color: #818cf8;
+  font-weight: 600;
+}
+
+.pagination-pages-list {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.pagination-ellipsis {
+  color: #64748b;
+  padding: 0 4px;
+  font-size: 0.9rem;
+}
+
+/* Botão numérico padrão */
+.pagination-btn-page {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: #94a3b8;
+  font-weight: 400;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination-btn-page:disabled {
+  cursor: not-allowed;
+}
+
+/* Estado ativo do botão numérico */
+.pagination-btn-page.is-active {
+  border: 1px solid #6366f1;
+  background: rgba(99, 102, 241, 0.25);
+  color: #818cf8;
+  font-weight: 600;
+}
+
+/* Container do seletor de limite */
+.pagination-limit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Texto descritivo "Itens por página:" */
+.pagination-limit-label {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+/* O campo select em si */
+.pagination-limit-select {
+  background: rgba(30, 41, 59, 0.8);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.85rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+/* Muda a borda ao focar no select */
+.pagination-limit-select:focus {
+  border-color: #6366f1;
+}
+
+/* Estado desabilitado quando estiver carregando */
+.pagination-limit-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Estilização das opções internas do menu drop-down */
+.pagination-limit-select option {
+  background: #1e293b;
+  color: #f8fafc;
+}
